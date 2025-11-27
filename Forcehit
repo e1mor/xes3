@@ -1,0 +1,35 @@
+local Keybind = Enum.KeyCode.X --// Toggle Keybind
+
+local function mouseclosest() --// Gets the closest player to your mouse
+    local closestplr = nil
+    local closestdist = math.huge
+    for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local playerRoot = player.Character.HumanoidRootPart
+            local distance = (playerRoot.Position - game:GetService("Players").LocalPlayer:GetMouse().Hit.p).Magnitude
+            if distance < closestdist and player ~= game:GetService("Players").LocalPlayer then
+                closestdist = distance
+                closestplr = player
+            end
+        end
+    end
+    return closestplr
+end
+game:GetService("UserInputService").InputBegan:Connect(function(input) --// Toggles teleportation
+    if input.KeyCode == Keybind then
+        if teleporting then
+            teleporting = false
+            currentPlayer = nil
+        else
+            teleporting = true
+            currentPlayer = mouseclosest()
+        end
+    end
+end)
+game:GetService("RunService").RenderStepped:Connect(function() --// Loop to teleport
+    if teleporting and currentPlayer then
+        if currentPlayer.Character and currentPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            currentPlayer.Character.HumanoidRootPart.CFrame = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, -6.5)
+        end
+    end
+end)
